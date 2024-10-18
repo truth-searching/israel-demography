@@ -32,15 +32,17 @@ def simulate_population_growth(transition_matrix, birth_rates, mortality_rate, i
 
 # Example parameters
 # Transition matrix (rows: from group, columns: to group)
+# the table is based on https://www.haaretz.co.il/magazine/2024-07-04/ty-article-magazine/.highlight/00000190-7896-d14c-a1dd-fb9f6ec40000
 transition_matrix = np.array([ # actual
-    [0.75, 0.38, 0.09, 0.07, 0.03, 0.06, 0.01, 0],
-    [0.15, 0.42, 0.27, 0.14, 0.09, 0.07, 0.04, 0],
-    [0.03, 0.12, 0.47, 0.31, 0.19, 0.07, 0.05, 0],
-    [0.02, 0.02, 0.05, 0.34, 0.09, 0.08, 0.01, 0],
-    [0.01, 0.03, 0.07, 0.08, 0.40, 0.16, 0.05, 0],
-    [0.02, 0.02, 0.02, 0.03, 0.15, 0.46, 0.07, 0],
-    [0.02, 0.01, 0.03, 0.03, 0.05, 0.10, 0.77, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1]
+    [0.75, 0.38, 0.09, 0.07, 0.03, 0.06, 0.01, 0, 0],
+    [0.15, 0.42, 0.27, 0.14, 0.09, 0.07, 0.04, 0, 0],
+    [0.03, 0.12, 0.47, 0.31, 0.19, 0.07, 0.05, 0, 0],
+    [0.02, 0.02, 0.05, 0.34, 0.09, 0.08, 0.01, 0, 0],
+    [0.01, 0.03, 0.07, 0.08, 0.40, 0.16, 0.05, 0, 0],
+    [0.02, 0.02, 0.02, 0.03, 0.15, 0.46, 0.07, 0, 0],
+    [0.02, 0.01, 0.03, 0.03, 0.05, 0.10, 0.77, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1]
 ])
 transition_matrix_III = np.array([ # haredi same as hardal
     [0.75, 0.38, 0.09, 0.07, 0.03, 0.06, 0.06, 0],
@@ -76,6 +78,7 @@ transition_matrix_I = np.array([ # desired
     [0, 0, 0, 0, 0, 0, 0, 1]
 ])
 
+# debugging case (secular rules):
 #transition_matrix = np.eye(8)
 #transition_matrix[0,1:7] = 0.99
 #for i in range(1,7):
@@ -96,8 +99,8 @@ for i in range(transition_matrix.shape[0]):
 
 print(transition_matrix)
 
-# childern for a woman
-children = np.array([2, 3, 4, 3, 5, 6, 7, 3])
+# childern for a woman: based in wikipedia
+children = np.array([1.96, 2, 2.3, 2.6, 3.92, 5, 6.64, 3.01, 4])
 
 # Birth rates vector (example values)
 birth_rates = np.array([1.021, 1.030, 1.040, 1.050, 1.060, 1.068, 1.070])
@@ -105,11 +108,14 @@ birth_rates = 1 + 5 * children / 1000
 print('birth_rates', birth_rates)
 mortality_rate = 1 - 6 / 1000
 
-# Initial group sizes (example values)
-non_jews_prop = 0.5 #0.264  # 0.5  # 0.264 0.181 christians = 0.013 druze = 0.015 muslems = 
-jews_prop = 1 - non_jews_prop
+group_labels = ['Secular', 'Secular-Traditional', 'Traditional', 'Dati-Liberal', 'Dati-Leumi', 'Hardal', 'Haredi', 'Non Jews', 'Occupied Arabs']
+
+# Initial group sizes (example values): based on the elections for the Kneset and poles
+non_jews_prop = 0.264  # 0.5  # 0.264 0.181 christians = 0.013 druze = 0.015 muslems = 
+occupied_arabs = 0.25
+jews_prop = 1 - (non_jews_prop + occupied_arabs)
 inter_jews_prop = [0.1775, 0.2, 0.1682, 0.0844, 0.1543, 0.038, 0.1776]
-initial_prop = np.array([p*jews_prop for p in inter_jews_prop] + [non_jews_prop])
+initial_prop = np.array([p*jews_prop for p in inter_jews_prop] + [non_jews_prop, occupied_arabs])
 initial_sizes = 10e7 * initial_prop
 print(sum(initial_prop))
 assert abs(sum(initial_prop) - 1) < 1e-9
@@ -122,7 +128,6 @@ populations = simulate_population_growth(transition_matrix, birth_rates, mortali
 
 # Plot the results
 years = np.arange(y+1)
-group_labels = ['Secular', 'Secular-Traditional', 'Traditional', 'Dati-Liberal', 'Dati-Leumi', 'Hardal', 'Haredi', 'Non Jews']
 
 plt.figure(figsize=(10, 6))
 
@@ -138,16 +143,19 @@ plt.xlabel('Years')
 plt.ylabel('Population Size')
 plt.legend()
 plt.grid(True)
+plt.savefig('population_tribes_100_years.png')
 
 plt.figure(2)
 plt.plot(years, liberal/np.sum(populations, axis=1), label='liberal')
 plt.plot(years, non_liberal/np.sum(populations, axis=1), label='non liberal')
 plt.plot(years, populations[:,7]/np.sum(populations, axis=1), label='non jews')
+plt.plot(years, populations[:,8]/np.sum(populations, axis=1), label='occupied arabs')
 
 plt.title('Population Growth Over 100 Years')
 plt.xlabel('Years')
 plt.ylabel('Population Size')
 plt.legend()
 plt.grid(True)
+plt.savefig('coalitions_100_years.png')
 
 plt.show()
