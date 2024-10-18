@@ -53,7 +53,7 @@ transition_matrix_III = np.array([ # haredi same as hardal
     [0, 0, 0, 0, 0, 0, 0, 1]
 ])
 
-transition_matrix = transition_matrix_III
+#transition_matrix = transition_matrix_III
 
 transition_matrix_II = np.array([ # worst
     [0.75, 0.38, 0.09, 0.07, 0.03, 0.06, 0.01, 0],
@@ -106,7 +106,7 @@ print('birth_rates', birth_rates)
 mortality_rate = 1 - 6 / 1000
 
 # Initial group sizes (example values)
-non_jews_prop = 0.264  # 0.5  # 0.264 0.181 christians = 0.013 druze = 0.015 muslems = 
+non_jews_prop = 0.5 #0.264  # 0.5  # 0.264 0.181 christians = 0.013 druze = 0.015 muslems = 
 jews_prop = 1 - non_jews_prop
 inter_jews_prop = [0.1775, 0.2, 0.1682, 0.0844, 0.1543, 0.038, 0.1776]
 initial_prop = np.array([p*jews_prop for p in inter_jews_prop] + [non_jews_prop])
